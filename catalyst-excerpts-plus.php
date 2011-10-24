@@ -3,7 +3,7 @@
 Plugin Name: Catalyst Excerpts Plus
 Plugin URI: http://imnotmarvin.com/catalyst-excerpts-plus/
 Description: Catalyst Excerpts Plus builds on the Catalyst Excerpts widget with additional features. This is based on the Catalyst Excerpts Widget created by Eric Hamm that comes with the Catalyst Framework. This plugin requires the Catalyst framework. <a href="http://wp.me/P1hBKZ-f" target="_blank">Learn more about Catalyst...</a>
-Version: 1.0
+Version: 1.1
 Author: Michael Davis
 Author URI: http://imnotmarvin.com
 License: GPLv2
@@ -15,10 +15,8 @@ GNU General Public License for more details.
 
 For the latest copy of the GNU General Public License, see <http://www.gnu.org/licenses/>.
 
-0.1 - Optional display random excerpts
-0.2 - Optional don't strip html from titles
-0.3 - Optional don't strip html from excerpt
-0.4 - Sort by hottest topics
+1.0 - Initial release. Display random excerpts, allow html from titles, allow html from excerpt content.
+1.1 - Changed thumbnail options for outside/inside to outside/inside-top/inside-bottom. This way you can control whether the thumbnail displays above the excerpt content or below it.
 */
 
 remove_action( 'widgets_init', create_function( '', "register_widget( 'catalyst_excerpt_widget' );" ) );
@@ -54,7 +52,7 @@ class catalyst_excerpt_plus_widget extends WP_Widget {
 			'display-thumbnails' => 0,
 			'thumbnail-size' => 'thumbnail',
 			'thumbnail-alignment' => 'left',
-			'thumbnail-location' => 'inside',
+			'thumbnail-location' => 'inside-top',
 			'byline-author' => 0,
 			'byline-date' => 0,
 			'byline-comments' => 0,
@@ -229,7 +227,7 @@ class catalyst_excerpt_plus_widget extends WP_Widget {
 		
 		if( function_exists( 'has_post_thumbnail' ) )
 		{
-			if( has_post_thumbnail() && !empty( $options['display-thumbnails'] ) && $options['thumbnail-location'] == 'inside' )
+			if( has_post_thumbnail() && !empty( $options['display-thumbnails'] ) && $options['thumbnail-location'] == 'inside-top' )
 			{
 				ob_start();
 				the_post_thumbnail( ( $options['thumbnail-size'] ), array( 'class' => $thumbnail_alignment ) );
@@ -260,6 +258,18 @@ class catalyst_excerpt_plus_widget extends WP_Widget {
 				echo '<p>' . $more_text . '</p>' . "\n";
 			}
 		}
+		
+		if( function_exists( 'has_post_thumbnail' ) )
+		{
+			if( has_post_thumbnail() && !empty( $options['display-thumbnails'] ) && $options['thumbnail-location'] == 'inside-bottom' )
+			{
+				ob_start();
+				the_post_thumbnail( ( $options['thumbnail-size'] ), array( 'class' => $thumbnail_alignment ) );
+				$the_post_thumbnail = ob_get_clean();
+				
+				printf( '<a href="%s" title="%s">%s</a>', get_permalink(), the_title_attribute('echo=0'), $the_post_thumbnail );
+			}
+		}
 	}
 
 	function update($new_options, $old_options)
@@ -285,7 +295,7 @@ class catalyst_excerpt_plus_widget extends WP_Widget {
 			'allow-excerpt-html' => 0,
 			'thumbnail-size' => '',
 			'thumbnail-alignment' => 'left',
-			'thumbnail-location' => 'inside',
+			'thumbnail-location' => 'inside-top',
 			'byline-author' => 0,
 			'byline-date' => 0,
 			'byline-comments' => 0,
@@ -392,7 +402,8 @@ class catalyst_excerpt_plus_widget extends WP_Widget {
 					</select><br />
 					<label for="<?php echo $this->get_field_id( 'thumbnail-location'); ?>"><?php _e( 'Location', 'catalyst' ); ?></label>
 					<select id="<?php echo $this->get_field_id( 'thumbnail-location'); ?>" name="<?php echo $this->get_field_name( 'thumbnail-location' ); ?>">
-						<option value="inside" <?php selected( 'inside' , $options['thumbnail-location'] ); ?>><?php _e( 'Inside', 'catalyst' ); ?></option>
+						<option value="inside-top" <?php selected( 'inside-top' , $options['thumbnail-location'] ); ?>><?php _e( 'Inside - Top', 'catalyst' ); ?></option>
+						<option value="inside-bottom" <?php selected( 'inside-bottom' , $options['thumbnail-location'] ); ?>><?php _e( 'Inside - Bottom', 'catalyst' ); ?></option>
 						<option value="outside" <?php selected( 'outside' , $options['thumbnail-location'] ); ?>><?php _e( 'Outside', 'catalyst' ); ?></option>
 					</select><br />
 					<label for="<?php echo $this->get_field_id( 'thumbnail-size' ); ?>"><?php _e( 'Image Size', 'catalyst' ); ?>:</label>
